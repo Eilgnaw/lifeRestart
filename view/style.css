@@ -80,6 +80,11 @@ html {
     z-index:2;
 }
 
+.showall {
+	top: 1.5em;
+	margin-left: 5.5em;
+}
+
 .iconfont {
     font-family: "iconfont" !important;
     font-style: normal;
