@@ -75,11 +75,20 @@ class App{
             });
 
         // Talent
+        // const talentPage = $(`
+        // <div id="main">
+        //     <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
+        //     <button id="random" class="mainbtn" style="top: 50%;">10连抽！</button>
+        //     <ul id="talents" class="selectlist"></ul>
+        //     <button id="next" class="mainbtn" style="top:auto; bottom:0.1em">请选择3个</button>
+        // </div>
+        // `);
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
-            <button id="random" class="mainbtn" style="top: 50%;">10连抽！</button>
             <ul id="talents" class="selectlist"></ul>
+            <button id="random" class="mainbtn" style="top: 80%;">10连抽！</button>
+            <button id="listall" class="mainbtn showall">显示全部</button>
             <button id="next" class="mainbtn" style="top:auto; bottom:0.1em">请选择3个</button>
         </div>
         `);
@@ -126,6 +135,47 @@ class App{
                         });
                     });
             });
+        
+        talentPage
+        .find('#listall')
+        .click(()=>{
+            const ul = talentPage.find('#talents');
+            talentPage.find('#random').hide();
+            ul.html('');
+            this.#life.talentAll()
+                .forEach(talent=>{
+                    const li = createTalent(talent);
+                    ul.append(li);
+                    this.#talentSelected.clear();
+                    li.click(()=>{
+                        if(li.hasClass('selected')) {
+                            li.removeClass('selected')
+                            this.#talentSelected.delete(talent);
+                        } else {
+                            if(this.#talentSelected.size==3) {
+                                this.hint('只能选3个天赋');
+                                return;
+                            }
+
+                            const exclusive = this.#life.exclusive(
+                                Array.from(this.#talentSelected).map(({id})=>id),
+                                talent.id
+                            );
+                            if(exclusive != null) {
+                                for(const { name, id } of this.#talentSelected) {
+                                    if(id == exclusive) {
+                                        this.hint(`与已选择的天赋【${name}】冲突`);
+                                        return;
+                                    }
+                                }
+                                return;
+                            }
+                            li.addClass('selected');
+                            this.#talentSelected.add(talent);
+                        }
+                    });
+                });
+        });
 
         talentPage
             .find('#next')
@@ -327,7 +377,7 @@ class App{
                 this.#life.talentExtend(this.#selectedExtendTalent);
                 this.#selectedExtendTalent = null;
                 this.#talentSelected.clear();
-                this.#totalMax = 20;
+                this.#totalMax = 10000;
                 this.#isEnd = false;
                 this.switch('index');
             });
